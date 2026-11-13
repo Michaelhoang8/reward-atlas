@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Reward Atlas — evaluate the path not taken</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="/">reward atlas<span>RA / 065</span></a
+        ><span>OFF-POLICY EVALUATION</span>
+      </header>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">LEARN FROM THE DECISIONS ALREADY MADE</p>
+          <h1>A different policy.<br /><em>The same evidence.</em></h1>
+        </div>
+        <p>
+          Compare a proposed policy with logged decisions.<br />Inspect the
+          weights, the assumptions,<br />and the uncertainty behind an estimate.
+        </p>
+      </section>
+      <div class="controls">
+        <label
+          >Weight cap<input
+            id="clip"
+            type="number"
+            min="0"
+            max="1000"
+            value="0"
+            step="1" /></label
+        ><label
+          >Bootstrap draws<input
+            id="replicates"
+            type="number"
+            min="50"
+            max="1000"
+            value="200"
+            step="50" /></label
+        ><label
+          >Seed<input
+            id="seed"
+            type="number"
+            min="1"
+            max="4294967295"
+            value="73" /></label
+        ><button id="compute">Evaluate policy ↗</button
+        ><select id="preset" aria-label="Example dataset">
+          <option value="default">Fictional recommendation log</option>
+          <option value="gap">Missing-overlap example</option>
+        </select>
+      </div>
+      <div id="notice" role="status">Evaluating the example…</div>
+      <section class="headline">
+        <div>
+          <p class="eyebrow">LAST COMPUTED DOUBLY ROBUST ESTIMATE</p>
+          <strong id="estimate">—</strong>
+          <p id="interpretation">Reward per decision</p>
+        </div>
+        <div class="metrics">
+          <div>
+            <strong id="ess">—</strong><span>effective sample size*</span>
+          </div>
+          <div>
+            <strong id="weight">—</strong><span>largest raw weight</span>
+          </div>
+          <div>
+            <strong id="truth">—</strong><span>known simulation value</span>
+          </div>
+        </div>
+      </section>
+      <section class="chart-section">
+        <div class="section-head">
+          <h2>Three views of the policy.</h2>
+          <span>95% ROW-BOOTSTRAP PERCENTILE INTERVALS</span>
+        </div>
+        <svg
+          id="chart"
+          viewBox="0 0 1000 280"
+          role="img"
+          aria-label="Policy estimates and bootstrap intervals"
+        ></svg>
+        <p class="small" id="conditions"></p>
+        <div class="reference">
+          <span id="logged"></span><span id="model-only"></span
+          ><span id="support"></span>
+        </div>
+      </section>
+      <details>
+        <summary>
+          Inspect influential rows <span>TOP TEN BY RAW WEIGHT</span>
+        </summary>
+        <table>
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Action</th>
+              <th>Reward</th>
+              <th>Raw weight</th>
+              <th>Used weight</th>
+              <th>DR contribution</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </details>
+      <details>
+        <summary>
+          Edit the logged dataset
+          <span>PROBABILITIES / REWARDS / FIXED PREDICTIONS</span>
+        </summary>
+        <p class="small">
+          Action indexes start at zero. Each row contains full behavior and
+          target distributions and fixed reward predictions q. Predictions must
+          be supplied independently of the reward being evaluated; this app does
+          not fit them.
+        </p>
+        <textarea
+          id="dataset"
+          rows="14"
+          spellcheck="false"
+          aria-label="Logged dataset JSON"
+        ></textarea>
+      </details>
+      <div class="exports">
+        <button id="export" class="quiet" disabled>Export evaluation ↓</button
+        ><button id="csv" class="quiet" disabled>
+          Export row contributions ↓</button
+        ><span
+          >*Weight concentration diagnostic, not a replacement for the number of
+          independent observations.</span
+        >
+      </div>
+      <footer>
+        <span>LOCAL WORKER · FIXED SEED · EXPLICIT OVERLAP</span>
+        <p>
+          Evaluation depends on valid logging probabilities, adequate support,
+          consistent rewards, and appropriate sampling assumptions. Bootstrap
+          intervals do not repair confounding, leakage, or a policy chosen using
+          the same evaluation data.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

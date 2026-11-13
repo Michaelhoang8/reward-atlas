@@ -16,7 +16,8 @@ export function validate(raw) {
     raw.actions.length < 2 ||
     raw.actions.length > 5 ||
     raw.actions.some(
-      (x) => typeof x !== "string" || !/^[A-Za-z0-9_-]{1,24}$/.test(x),
+      (x) =>
+        typeof x !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,23}$/.test(x),
     ) ||
     new Set(raw.actions).size !== raw.actions.length
   )
@@ -181,6 +182,8 @@ export function analyze(raw, { clip = 0, replicates = 200, seed = 73 } = {}) {
   };
 }
 export function example(seed = 17, count = 600) {
+  if (!Number.isInteger(count) || count < 1 || count > 2000)
+    throw Error("Example size must be an integer from 1 to 2,000.");
   const random = rng(seed),
     truth = [
       [0.8, 0.45, 0.25],
