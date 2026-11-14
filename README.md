@@ -16,6 +16,8 @@ The default is a fictional 600-decision recommendation log with three actions an
 
 Default results: IPS 0.613359, SNIPS 0.710602, DR 0.707735, model-only prediction 0.654333, and observed logging reward 0.463333. The known target value averaged over these simulated contexts is 0.708333. This single example is a reproducibility fixture, not evidence that one estimator always performs better.
 
+The estimate panel pairs numerical summaries with wide interval bands, labeled endpoints, and a separate simulation reference line. Interval reveals respect reduced-motion preferences. Missing support replaces the plot with an explicit explanation; editing the log uses a focused dialog. The narrow-screen chart and influential-row table scroll within their own containers.
+
 ## Explore
 
 - Change the weight cap: zero disables clipping. Positive caps reduce extreme contributions but can introduce bias.
@@ -30,13 +32,15 @@ Default results: IPS 0.613359, SNIPS 0.710602, DR 0.707735, model-only predictio
 ```json
 {
   "actions": ["Guide", "Explore"],
-  "rows": [{
-    "action": 0,
-    "reward": 1,
-    "behavior": [0.75, 0.25],
-    "target": [0.50, 0.50],
-    "q": [0.65, 0.80]
-  }]
+  "rows": [
+    {
+      "action": 0,
+      "reward": 1,
+      "behavior": [0.75, 0.25],
+      "target": [0.5, 0.5],
+      "q": [0.65, 0.8]
+    }
+  ]
 }
 ```
 
@@ -50,13 +54,13 @@ The complete default dataset is [docs/example.json](docs/example.json). The miss
 
 For row i, let `w = target(action) / behavior(action)`, `r` be its reward, and `qTarget = sum(target(a) * q(a))`.
 
-| Estimate | Formula |
-| --- | --- |
-| IPS | `mean(w * r)` |
-| SNIPS | `sum(w * r) / sum(w)` |
-| DR | `mean(qTarget + w * (r - q(chosen)))` |
-| Model only | `mean(qTarget)` |
-| Observed logging reward | `mean(r)` |
+| Estimate                | Formula                               |
+| ----------------------- | ------------------------------------- |
+| IPS                     | `mean(w * r)`                         |
+| SNIPS                   | `sum(w * r) / sum(w)`                 |
+| DR                      | `mean(qTarget + w * (r - q(chosen)))` |
+| Model only              | `mean(qTarget)`                       |
+| Observed logging reward | `mean(r)`                             |
 
 With a positive cap c, `min(w,c)` replaces w in IPS, SNIPS, and the DR correction. All three are labeled clipped. The model-only baseline remains unchanged. Effective sample size is `(sum(w))² / sum(w²)`; both raw and used-weight versions are exported. It describes weight concentration, not the amount of independent information in correlated observations.
 

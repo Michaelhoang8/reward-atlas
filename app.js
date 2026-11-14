@@ -14,6 +14,8 @@ const value = (n) =>
 function notice(text, error = false) {
   $("notice").textContent = text;
   $("notice").className = error ? "error" : "";
+  $("edit-notice").textContent = text;
+  $("edit-notice").className = error ? "error" : "";
 }
 function controls() {
   document
@@ -69,6 +71,10 @@ function render() {
     `${d.rows} rows · ${d.clippedRows} clipped · ${d.zeroWeights} zero weights · ${r.settings.replicates} seeded bootstrap draws. ${d.unsupportedRows ? "Support violations prevent identification from these logs." : "Intervals assume independent, representative rows and fixed evaluation inputs; they are not guaranteed coverage."} ${r.intervals.snips.valid < r.settings.replicates && r.identifiable ? "Some bootstrap draws have zero total weight; the SNIPS interval is unavailable." : ""}`;
   const chart = $("chart");
   chart.replaceChildren();
+  $("support-message").hidden = r.identifiable;
+  chart.parentElement.hidden = !r.identifiable;
+  $("support-message").textContent =
+    `Policy-value estimates withheld. The logging policy must support the target policy. Average unsupported target mass: ${(d.unsupportedMass * 100).toFixed(1)}%. The model-only number is extrapolation.`;
   if (!r.identifiable) {
     chart.append(
       svg(
@@ -130,21 +136,59 @@ function render() {
           `${r.settings.clip ? "Clipped " : ""}${k.toUpperCase()}`,
         ),
       );
-      if (interval.lower !== null)
+      if (interval.lower !== null) {
+        for (const className of ["interval-halo", "interval"])
+          chart.append(
+            svg("line", {
+              x1: x(interval.lower),
+              y1: y,
+              x2: x(interval.upper),
+              y2: y,
+              class: className,
+            }),
+          );
+        for (const [v, align] of [
+          [interval.lower, "end"],
+          [interval.upper, "start"],
+        ]) {
+          chart.append(
+            svg("line", {
+              x1: x(v),
+              y1: y - 7,
+              x2: x(v),
+              y2: y + 7,
+              class: "cap",
+            }),
+          );
+          chart.append(
+            svg(
+              "text",
+              {
+                x: x(v) + (align === "end" ? -5 : 5),
+                y: y - 18,
+                "text-anchor": align,
+                class: "endpoint",
+              },
+              value(v),
+            ),
+          );
+        }
+      }
+      if (estimate !== null) {
         chart.append(
-          svg("line", {
-            x1: x(interval.lower),
-            y1: y,
-            x2: x(interval.upper),
-            y2: y,
-            class: "interval",
-          }),
+          svg("circle", { cx: x(estimate), cy: y, r: 11, class: "point-halo" }),
         );
-      if (estimate !== null)
         chart.append(
-          svg("circle", { cx: x(estimate), cy: y, r: 6, class: "estimate" }),
+          svg("circle", { cx: x(estimate), cy: y, r: 5, class: "estimate" }),
         );
-      chart.append(svg("text", { x: 855, y: y + 4 }, value(estimate)));
+      }
+      chart.append(
+        svg(
+          "text",
+          { x: 855, y: y + 8, class: "estimate-value" },
+          value(estimate),
+        ),
+      );
     });
   }
   chart.setAttribute(
@@ -229,6 +273,8 @@ function compute() {
     },
   });
 }
+$("edit-open").onclick = () => $("edit-dialog").showModal();
+$("edit-close").onclick = () => $("edit-dialog").close();
 $("compute").onclick = compute;
 $("preset").onchange = preset;
 for (const id of ["clip", "replicates", "seed"]) $(id).oninput = invalidate;
